@@ -1,0 +1,18 @@
+app.use('/api', createProxyMiddleware({
+    target: 'http://example.com',
+    changeOrigin: true,
+    logLevel: 'debug',
+    onProxyReq: (proxyReq, req, res) => {
+        console.log(`Proxying request to: ${proxyReq.getHeader('host')}${req.url}`);
+        console.log(`Request method: ${req.method}`);
+        console.log(`Request headers: ${JSON.stringify(req.headers)}`);
+    },
+    onProxyRes: (proxyRes, req, res) => {
+        console.log(`Received response with status: ${proxyRes.statusCode}`);
+        console.log(`Response headers: ${JSON.stringify(proxyRes.headers)}`);
+    },
+    onError: (err, req, res) => {
+        console.error('Proxy error:', err);
+        res.status(500).send('Proxy error');
+    }
+}));
