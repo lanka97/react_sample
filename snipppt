@@ -23,3 +23,34 @@ app.use('/api', createProxyMiddleware({
         res.status(500).send('Proxy error');
     }
 }));
+
+
+const http = require('http');
+const url = require('url');
+const fetch = require('node-fetch');
+
+const server = http.createServer(async (req, res) => {
+    const targetUrl = 'http://example.com' + req.url;
+    const options = {
+        method: req.method,
+        headers: req.headers,
+    };
+
+    try {
+        const proxyRes = await fetch(targetUrl, options);
+
+        // Forward headers and status code to the response
+        res.writeHead(proxyRes.status, proxyRes.headers.raw());
+
+        // Stream the response body back to the client
+        proxyRes.body.pipe(res);
+    } catch (err) {
+        console.error(err);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Proxy request failed');
+    }
+});
+
+server.listen(3000, () => {
+    console.log('Proxy server is running on port 3000');
+});
